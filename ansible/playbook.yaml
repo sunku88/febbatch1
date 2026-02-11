@@ -1,0 +1,28 @@
+---
+- name: Install Java on target machines
+  hosts: webservers
+  become: yes
+  vars:
+    java_version: "11"  # Change to 8, 11, 17, or 21 as needed
+  
+  tasks:
+    - name: Update apt cache (Debian/Ubuntu)
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+      when: ansible_os_family == "Debian"
+
+    - name: Install OpenJDK on Debian/Ubuntu
+      apt:
+        name: "openjdk-{{ java_version }}-jdk"
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Verify Java installation
+      command: java -version
+      register: java_version_output
+      changed_when: false
+
+    - name: Display Java version
+      debug:
+        msg: "{{ java_version_output.stderr }}"

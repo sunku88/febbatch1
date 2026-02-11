@@ -17,3 +17,9 @@ variable "instance_count" {
   type        = number
   default     = 3
 }
+
+variable "key_name" {
+  description = "The name of the SSH key pair to attach to the instance"
+  type        = string
+  default     = ""
+}
