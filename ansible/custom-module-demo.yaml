@@ -1,0 +1,89 @@
+---
+- name: Demo of Custom Ansible Modules
+  hosts: localhost
+  gather_facts: yes
+  
+  tasks:
+    - name: Display demo information
+      debug:
+        msg: 
+          - "=== Custom Ansible Module Demo ==="
+          - "This playbook demonstrates custom modules created in Python"
+          - "Modules location: library/ directory"
+
+    - name: Use custom system_info module (basic usage)
+      system_info:
+        name: "Production Server"
+        hostname_only: false
+      register: system_result
+
+    - name: Display collected system information
+      debug:
+        var: system_result.system_info
+
+    - name: Use system_info module with file creation
+      system_info:
+        name: "Demo Server"
+        hostname_only: false
+        create_file: yes
+        file_path: "/tmp/ansible_system_report.txt"
+      register: file_result
+
+    - name: Show file creation result
+      debug:
+        msg: "System info file created at: {{ file_result.file_created }}"
+      when: file_result.changed
+
+    - name: Create a formal greeting using custom module
+      greeting_manager:
+        name: "DevOps Team"
+        greeting_type: "formal"
+        file_path: "/tmp/formal_greeting.txt"
+        state: present
+      register: greeting_result
+
+    - name: Display greeting result
+      debug:
+        var: greeting_result
+
+    - name: Create a casual greeting
+      greeting_manager:
+        name: "John"
+        greeting_type: "casual"
+        file_path: "/tmp/casual_greeting.txt"
+        state: present
+
+    - name: Create a professional greeting
+      greeting_manager:
+        name: "Project Manager"
+        greeting_type: "professional"
+        file_path: "/tmp/professional_greeting.txt"
+        state: present
+
+    - name: Read and display one of the greeting files
+      command: cat /tmp/formal_greeting.txt
+      register: greeting_content
+      changed_when: false
+
+    - name: Show greeting file content
+      debug:
+        msg: "{{ greeting_content.stdout_lines }}"
+
+    - name: Demo - Remove a greeting file
+      greeting_manager:
+        name: "Test User"
+        file_path: "/tmp/casual_greeting.txt"
+        state: absent
+      register: removal_result
+
+    - name: Display removal result
+      debug:
+        msg: "File removal status: {{ removal_result.message }}"
+
+    - name: Summary of demo
+      debug:
+        msg:
+          - "=== Demo Complete ==="
+          - "Custom modules successfully executed!"
+          - "Files created in /tmp/ directory"
+          - "Check the library/ directory for module source code"
